@@ -1,11 +1,11 @@
 'use strict';
 
 const url = 'https://best-credit-card.herokuapp.com/v1/me/wallets'
-const xhr = new XMLHttpRequest();
 const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDk5MzI5MzIsImlkIjoxLCJuYW1lIjoiQWxsaXNvbiBWLiJ9.N0XSf5f65d_F_FYPER9TonH62b4FdyGTilJVl1RwLVg";
 
 // Execution 1
 function request (method, url, token) {
+    const xhr = new XMLHttpRequest();    
     xhr.open(method, url, true);
     xhr.setRequestHeader ("Authorization", token);
     xhr.onreadystatechange = function () {
@@ -31,7 +31,8 @@ function request (method, url, token) {
 
 // Callbacks Execution
 
-function request (method, url, token, callback) {
+function requestCallback (method, url, token, callback) {
+    const xhr = new XMLHttpRequest();    
     xhr.open(method, url, true);
     xhr.setRequestHeader ("Authorization", token);
     xhr.onreadystatechange = function () {
@@ -44,14 +45,42 @@ function request (method, url, token, callback) {
     xhr.send()
 };
 
-request('GET', url, token, function printWallet(err, wallets) {
+/*requestCallback('GET', url, token, function printWallet(err, wallets) {
     if(err) throw err;
     wallets.forEach(function(element) {
         let url = `https://best-credit-card.herokuapp.com/v1/cards/wallets/${element.id}`;
-        request('GET', url, token, function printCards(err,cards) {
+        requestCallback('GET', url, token, function printCards(err,cards) {
             if(err) throw err;
             console.log(cards)
         })
     }, this);
-});
+});*/
 
+// Promise Execution
+
+function requestPromise (method, url, token) {
+    return new Promise (function (resolve, reject) {
+        const xhr = new XMLHttpRequest();        
+        xhr.onreadystatechange = function () {
+            if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                resolve(xhr.response)         
+            } else {
+                reject(xhr.statusText)
+            }
+        }
+        xhr.ontimeout = function () {
+            reject('timeout')
+          }
+        xhr.open(method, url, true);        
+        xhr.setRequestHeader ("Authorization", token);        
+        xhr.send()
+    })
+}
+
+requestPromise('GET', url, token)
+.then((response) => {
+    console.log(response)
+})
+.catch(err => {
+    console.log(err)
+});
