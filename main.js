@@ -5,20 +5,20 @@ const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MDk5MzI5M
 
 // Execution 1
 function request (method, url, token) {
-    const xhr = new XMLHttpRequest();    
+    const xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
     xhr.setRequestHeader ("Authorization", token);
     xhr.onreadystatechange = function () {
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            
+
             const wallets = JSON.parse(xhr.response);
             wallets.forEach(function(element) {
-                var wallet = document.createElement("li"); 
+                var wallet = document.createElement("li");
                 var content = document.createTextNode(JSON.stringify(element));
                 wallet.appendChild(content);
                 var domWallets = document.getElementById('wallets');
                 domWallets.appendChild(wallet);
-                
+
             }, this);
         } else {
 
@@ -32,12 +32,12 @@ function request (method, url, token) {
 // Callbacks Execution
 
 function requestCallback (method, url, token, callback) {
-    const xhr = new XMLHttpRequest();    
+    const xhr = new XMLHttpRequest();
     xhr.open(method, url, true);
     xhr.setRequestHeader ("Authorization", token);
     xhr.onreadystatechange = function () {
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            callback(null, JSON.parse(xhr.response));            
+            callback(null, JSON.parse(xhr.response));
         } else {
             callback(xhr.status, xhr.response)
         }
@@ -60,10 +60,10 @@ function requestCallback (method, url, token, callback) {
 
 function requestPromise (method, url, token) {
     return new Promise (function (resolve, reject) {
-        const xhr = new XMLHttpRequest();        
-        xhr.onreadystatechange = function () {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
             if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                resolve(xhr.response)         
+                resolve(xhr.response)
             } else {
                 reject(xhr.statusText)
             }
@@ -71,15 +71,22 @@ function requestPromise (method, url, token) {
         xhr.ontimeout = function () {
             reject('timeout')
           }
-        xhr.open(method, url, true);        
-        xhr.setRequestHeader ("Authorization", token);        
+        xhr.open(method, url, true);
+        xhr.setRequestHeader ("Authorization", token);
         xhr.send()
     })
 }
 
 requestPromise('GET', url, token)
 .then((response) => {
-    console.log(response)
+    const wallets = JSON.parse(response)
+    return Promise.all(wallets.map(function(wallet){
+      console.log(wallet);
+      return requestPromise('GET', `https://best-credit-card.herokuapp.com/v1/cards/wallets/${wallet.id}`, token)
+    }))
+})
+.then(cards => {
+  console.log(cards);
 })
 .catch(err => {
     console.log(err)
