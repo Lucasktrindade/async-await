@@ -1,6 +1,6 @@
 # Diferença entre o callback, promise e async/await
 
-Este repositório tem o objetivo de mostrar a diferença na implementação do callback, promise e async/await tendo o objetivo final de mostrar como funciona o asyn/await e como melhora a legibilidade do projeto.
+Este repositório tem o objetivo de mostrar a diferença na implementação do callback, promise e async/await tendo o objetivo final de mostrar como funciona o async/await e como melhora a legibilidade do projeto.
 
 ### Callback
 ```javascript
